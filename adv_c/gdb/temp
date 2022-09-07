@@ -1,0 +1,7 @@
+rbp            0x7fffffffdf60   0x7fffffffdf60
+rsp            0x7fffffffdf40   0x7fffffffdf40
+  Id   Target Id         Frame
+  1    Thread 0x7ffff7fdd740 (LWP 7217) "a.out" negative_counter () at multithread.c:26
+  2    Thread 0x7ffff77c2700 (LWP 7480) "a.out" 0x00005555555547e9 in counter (arg=0x0) at multithread.c:7
+* 3    Thread 0x7ffff6fc1700 (LWP 7488) "a.out" multiplier (arg=0x0) at multithread.c:16
+

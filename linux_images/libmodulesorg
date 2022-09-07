@@ -1,0 +1,36 @@
+5.4.0-84-generic
+5.4.0-91-generic
+5.4.0-92-generic
+5.4.0-94-generic
+5.4.0-94-generic
+
+
+-------INITIAL LOG OF BUILDING linux-5.4.0-org--------------------
+tarzan@tarzan-Inspiron-3558:~/tarzan_ws/kernel/linux_5.4.0.orig/linux-5.4$ make -j 3 KDEB_PKGVERSION=5.4.0.org-tarzan deb-pkg
+  UPD     include/config/kernel.release
+make clean
+sh ./scripts/package/mkdebian
+  TAR     linux-5.4.0.tar.gz
+origversion=$(dpkg-parsechangelog -SVersion |sed 's/-[^-]*$//');\
+	mv linux-5.4.0.tar.gz ../linux-5.4.0_${origversion}.orig.tar.gz
+dpkg-buildpackage -r"fakeroot -u" -a$(cat debian/arch)  -i.git -us -uc
+dpkg-buildpackage: info: source package linux-5.4.0
+dpkg-buildpackage: info: source version 5.4.0.org-tarzan
+dpkg-buildpackage: info: source distribution bionic
+dpkg-buildpackage: info: source changed by tarzan <tarzan@tarzan-Inspiron-3558>
+dpkg-buildpackage: info: host architecture amd64
+ dpkg-source -i.git --before-build linux-5.4
+
+
+error---------
+  CC [M]  kernel/torture.o
+  AR      kernel/built-in.a
+  GEN     kernel/kheaders_data.tar.xz
+  CC [M]  kernel/kheaders.o
+debian/rules:6: recipe for target 'build' failed
+make[2]: *** [build] Error 2
+dpkg-buildpackage: error: debian/rules build subprocess returned exit status 2
+scripts/Makefile.package:73: recipe for target 'deb-pkg' failed
+make[1]: *** [deb-pkg] Error 2
+Makefile:1430: recipe for target 'deb-pkg' failed
+make: *** [deb-pkg] Error 2

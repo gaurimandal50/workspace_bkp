@@ -1,0 +1,71 @@
+#GDB (GNU DEBUGGER) IS A USEFUL COMMAND LINE TOOL THAT ALLOWS CONTROLLED AND TRANSPARENT EXECUTION OF A C (OR SOME OTHER) PROGRAMS.
+#THIS HELPS IN DEBUGGING THE CODE.
+
+gcc -g example.c  #The -g command instructs gcc to compile example.c in debug mode
+                  #So that the elf file a.out will have symbols along with address of variables and functions.
+
+gdb a.out
+               #When program is restarted with 'r', probably the breakpoints do not change. Check it.
+layout next    #Shows a window in upper portion of console of gdb where it shows the source code and current line of execution
+break main     #puts a breakpoint at starting address of main()
+break 100      #puts a breakpoint at line 100
+b multithread.c: main      #For a multi filed program, this sort of syntax avoids conflicts for gdb debugger
+b multithread.c: 33
+break (b)      
+               #To execute a command at any breakpoint or watchpoint see 'commands'
+run (r)        #To start/restart the program in gdb
+continue (c)   #To continue the process when halt at a breakpoint
+next (n)       #To continue but with only single line of execution each time enter is hit
+[ENTER hit]    #Re-run last gdb command 
+refresh
+delete (d)     #Deletes a breakpoint. E.g. d 1
+clear          #If you don't remember breakpoint number, use clear. clear [breakpoint number | function name ]
+step (s)       #Runs step by step and stops only at breakpoints or at the end of program
+disable/enable #Disables or enables a breakpoint without deleting it. E.g. disable 1
+display        #Displays value of a variable or expression everytime. E.g. "display x" OR to print in hex "display /x x"        
+undisp         #Cancels display. E.g. undisp N
+watch          #watch var    OR watch expr.   Displays whenever var changes or expr becomes true and pauses there
+               #So whenever the value of expr changes (from 0 to 1 or 1 to 0), it will break there like breakpoint(watchpoint)
+command        #Executes set of commands everytime a breakpoint (N breakpoint or watchpoint) occurs. E.g.
+    (gdb) command N
+     > printf "The value of variable a is %d.\n", a
+     > print /x x
+     > end
+               #Probably only one command can be there on a watchpoint or breakpoint. Check this statement.
+
+bt, where -    #Display backtrace. To find out where you are in the execution of your program and how you got there.
+               #Use one of these commands. This will show the backtrace of the execution, including the function names and arguments. 
+set            #Sets/changes value of a variable. set variable x = 15
+define         #Define a new command. Use this if you want to define a new command. This is similar to assigning a macro
+               #and can save you typing. Just as with a macro, you can put together several commands. For example,
+               #if you were tired of typing
+    (gdb) define db
+    Type commands for definition of "db".
+    End with a line saying just "end".
+     > target remote unix :.sockets/gdb 
+     > end
+     #(If you put this or other commands in a file called .gdbinit, GDB will execute them automatically at startup time.)
+info           #Display information. With this command you can get information about various things in your debugging session.
+               #For example, to list all breakpoints, type:
+    (gdb) info breakpoints
+        #To see the current state of the hardware machine registers, type:
+    (gdb) info registers
+help           #To know about commands
+
+
+thread thread-id  #A command to switch among threads
+info threads      #A command to inquire about existing threads. * mark show the thread in in current context 
+                  #when working (debugging) one thread, other threads can do whatever they like (i.e. execute)
+set print thread-events #which controls printing of messages on thread start and exit
+set libthread-db-search-path path #which lets the user specify which libthread_db to use if the default choice isn’t compatible with the program. 
+
+#-------------------------------------------------------CORE_DUMP------------------------------------------------------------
+cat /proc/sys/kernel/core_pattern OR sysctl kernel.core_pattern #To check where core will be dumped
+sudo sysctl -w kernel.core_pattern="/tmp/%e_core_dump.%p" #To set where to dump core
+ulimit -c unlimited
+a.out
+#The core will get dumped in /tmp/ directory with executable_name_core_dump.pid format
+sudo gdb /path/to/a.out /path/to/a.out_core_dump.8850
+#This will show brief of backtrace in gdb prompt
+#To check full backtrace enter 'backtrace' or 'bt' OR 'bt full'
+#--------------------------------------------------------------------------------------------------------------------------------

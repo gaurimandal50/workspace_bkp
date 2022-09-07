@@ -1,0 +1,4 @@
+apt-get install pulseaudio
+apt-get install libpulse-dev
+apt-get install osspd
+

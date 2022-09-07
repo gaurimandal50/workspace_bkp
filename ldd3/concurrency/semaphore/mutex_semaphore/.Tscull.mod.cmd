@@ -1,0 +1,1 @@
+cmd_/home/tarzan/tarzan_ws/ldd3/concurrency/semaphore/mutex_semaphore/Tscull.mod := { echo  /home/tarzan/tarzan_ws/ldd3/concurrency/semaphore/mutex_semaphore/Tscull.o;  echo; } > /home/tarzan/tarzan_ws/ldd3/concurrency/semaphore/mutex_semaphore/Tscull.mod

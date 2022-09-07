@@ -1,0 +1,12 @@
+bubble_sort	0.000007
+selection_sort	0.000002
+insertion_sort	0.000002
+cocktail_sort	0.000002
+shell_sort	0.000002
+merge_sort	0.000005
+quick_sort	0.000002
+heap_sort	0.000003
+count_sort	0.000007
+bucket_sort	0.000006
+radix_sort	0.000002
+native_sort	0.000002

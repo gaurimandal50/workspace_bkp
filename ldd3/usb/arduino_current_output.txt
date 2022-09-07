@@ -1,0 +1,16 @@
+output can be taken from arduino uno serial port or simply by tail -f /dev/ttyACM0 (dmesg to find actual tty interface)
+
+---------------------------------------------------------------------------------------------//exclude this line
+Sens3  0cm             Sensor6  0cm      Relay will switch on the robot should stop
+
+Sensor1  94cm       Sensor2  0cm         Sensor3  0cm             Sensor6  0cm      Relay will switch on the robot should stop
+
+Sensor1  94cm       Sensor2  0cm         Sensor3  0cm         Sensor1  92cm       Sensor2  0cm         Sensor3  0cm         Sensor4  0cm       Sensor5  134cm       Sensor6  0cm      Relay will switch on the robot should stop
+
+Sensor1  95cm       Sensor2  0cm         Sensor3  0cm         Sensor4  0cm       Sensor5  134cm       Sensor6  0cm      Relay will switch on the robot should stop
+
+Sensor1  96cm       Sensor2  0cm         Sensor3  0cm         Sensor4  0cm       Sensor5  134cm       Sensor6  0cm      Relay will switch on the robot should stop
+
+Sensor1  94cm       Sensor2  0cm         Sensor3  0cm         Sensor4  0cm       Sensor5  134cm       Sensor6  0cm      Relay will switch on the robot should stop
+
+

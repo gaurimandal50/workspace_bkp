@@ -1,0 +1,45 @@
+ioctl is a file operation in file system devices.
+This is used for writing (or configuring), reading, debugging purposes.
+There are other alternatives for debugging like printk, printk along with print_limit(something like that),
+proc file system, etc.
+There is another alternative of ioctl to control device like direct controlling of device.(check more about it.)
+fcntl is implemented in very much similar way to ioctl. (check more)
+ioctl in struct file_operations has been changed and new way of using ioctl is by \
+    using calls function pointers like unlocked_ioctl, compat_ioctl.
+capability() is used to check the capability of a user for granting access to certain action.
+most of capability work is dony by kernel itself.
+
+access_ok(type, addr, size) //deprecated
+access_ok(addr, size) is used to check the validity of user space address to avoid oops (segmentation fault like error
+    in kernel space)
+
+
+NOTE:
+1 compat_ioctl: The ioctl that must be implemented by the 64-bit driver. When there is a 32-bit userspace application call 64-bit kernel IOCTL, this callback will be called. If compat_ioctl is not implemented, the 32-bit user program will return an error when executing ioctl on the 64-bit kernel: Not a typewriter
+
+2. If a 64-bit user program runs on a 64-bit kernel, unlocked_ioctl is called. If a 32-bit APP runs on a 32-bit kernel, it also calls unlocked_ioctl.
+
+
+try_module_get(THIS_MODULE); //used in open system call in a driver for increasing usercount.
+module_put(THIS_MODULE); //used in close system call in a driver for decreasing usercount.
+
+int (*ioctl) (struct inode *inode, struct file *filp,
+         unsigned int cmd, unsigned long arg); //deprecated
+
+long (*unlocked_ioctl) (struct file *filp, unsigned int cmd, 
+                           unsigned long arg); //called when kernel is 64 bit and user process is also 64 bit
+
+long (*compat_ioctl) (struct file *filp, unsigned int cmd, 
+                      unsigned long arg); //called when kernel is 64 bit and user process is 32 bit.
+
+/*
+ *Creating ioctl numbers which contain (type = magic number = systemwide unique number for device e.g. major,
+ *ordinal no = unique number among all the ioctl commands in same device e.g. 0,1,2,etc.
+ *direction bit = W,R,WR markings in macros like _IOW, _IOWR, _IOR, _IO take care of 3rd number
+ *size = type of data we want to get/set with the ioctl call.
+ *These numbers can be manipulated using various macros provided in ioctl.h. The bit field architecture in
+ *ioctl_number is given by various macros in ioctl.h viz _IOC_TYPEBITS (type bits), _IOC_NRBITS (ordinal number bits),
+ *_IOC_READ, _IOC_WRITE, and _IOC_READ | _IOC_WRITE (direction bits)
+ */
+    /*_IOC_TYPE, _IOC_NR etc are manipulator macros for ioctl numbers to get particular number viz magic, ordinal, direction, size
+     * from ioctl number for verification purpose*/

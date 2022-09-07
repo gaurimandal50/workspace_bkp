@@ -1,0 +1,279 @@
+RULES AND PRACTICES:
+
+1) No locks (semaphore or spinlock) should be locked twice. E.g. A function locks and then calls
+   another function that also calls lock. It will simply hang the process.
+
+2) Normally internal functions (static ones) do not take lock as they assume that lock is already
+   taken by caller function. But it's nice to document this explicitly. On the other hand the 
+   functions that are called from outside, take lock explicitly.
+
+3) Taking multiple locks is a risky taks and needs a lot of care. But there are times when taking
+   multiple locks has no alternative. In such case the rule is that multiple locks must always be 
+   taken in the same order. I.e. if L1, L2 is locked in thread 1 and thread 2 also needs to lock
+   those both locks then that must lock in same order viz L1 and then L2. Violating order will 
+   end of both threads going to deadlock sooner or later. E.g. if thead1 takes L1 and tries to
+   take L2 but at the same time thead 2 takes L2 first and then tries to take L1. In such case 
+   thread 1 waits for L2 and thread 2 waits for L1. Both will not proceed unless their requirement
+   is met and that will never be met actually. Hence both the threads will go in deadlock.
+
+4) When taking multiple locks follow a rule that, if there is a local lock and a central lock that
+   is used my many threads then first take the local lock and then take the central lock. So that
+   in worst scenario the central lock won't go in sleep for long time.
+   Similarly while taking semaphore lock and spin lock both, always take semaphore lock first and 
+   then the spinlock. Doing so will allow spinlock not to go in wait for long time. Otherwise if 
+   spinlock is taken first and sempahore puts the thread in waiting then spinlock has to wait. And
+   we know that spinlock is aimed to not put in sleep. It must complete as soon as possible.
+
+5) The big kernel lock turned the entire kernel into one large critical section; only one CPU could
+   be executing kernel code at any given time. The BKL exists no more.
+   
+6)FINE VS COARSE GRAINED LOCKING:
+  a) In fine grained locking each small resource has it's own lock. It is good for scalability.
+     In fine grained locking system, large number of locks are there and it can be hard to track
+     their locking order and when some bug comes related to lock, it is even more complicated to 
+     debug. So fine grained locking has it's own cost. So they advice to start coding with relatively
+	 coarse grained locking unless there is a good reason for fine grained locking.
+
+  b) In coarse grained locking a single lock protects entire system of resources. It is not good for
+     scalability.
+
+7) There are tools like lockmeter, splat to check the time taken by locks in a process. It lets debug if
+   locks are causing performance issues in system.
+
+8) Often there are no alternative of lock (semaphore or spinlock) but there are scenarios where few alternatives
+   can be used and lock-free code can be written.
+   a) Lock free algorithm: One writer thread and multiple reader threads can do resource sharing without lock.
+      flag = true; //is an atomic operation hence mere change of lock flag is an atomic operation and can't cause
+	  problem in this method.
+   b) Atomic variables: 
+	  atomic_t //<asm/atomic.h> holds an int value supported on all architecture
+	  Kernel provides some operations on atomic_t variable which is guaranteed to be atomic as they
+	  compile to a single instruction whenever possible. They are very fast.
+	  atomic_t t = ATOMIC_INIT(0), atomic_set(atomic_t *v, int i), atomic_read(atomic_t *v), atomic_add(int i, atomic_t *v),
+	  atomic_sub(int i, atomic_t *v), atomic_inc(atomic_t *v), atomic_dec(atomic_t *v), atomic_inc_and_test, atomic_dec_and_test,
+	  atomic_sub_and_test, atomic_add_negative, atomic_add_return, atomic_sub_return, atomic_inc_return, atomic_dec_return
+
+      atomic variable must be accessed through these functions only.
+      Also atomicity is only guaranteed for one call of these functions. Calling multiple times does not guarantee 
+      atomicity of all but individual.	  
+	c) <asm/bitops.h>
+	   void set_bit(nr, void *addr);
+       Sets bit number nr in the data item pointed to by addr.
+       void clear_bit(nr, void *addr);
+       Clears the specified bit in the unsigned long datum that lives at addr. Its semantics
+       are otherwise the same as set_bit.
+       void change_bit(nr, void *addr);
+       Toggles the bit.
+	   test_bit(nr, void *addr);  //returns nr th bit
+	   int test_and_set_bit(nr, void *addr);
+       int test_and_clear_bit(nr, void *addr);
+       int test_and_change_bit(nr, void *addr);
+       Behave atomically like those listed previously, except that they also return the
+       previous value of the bit.
+	   
+	   /* try to set lock */
+	   while (test_and_set_bit(nr, addr) != 0) /*Important point. You only get lock if it was previously 0 i.e. returns 0
+	                                             If it returns 1 that means some other thread had already taken lock, you have to spin*/
+	   wait_for_a_while( ); //spins
+	   /* do your work */
+	   /* release lock, and check... */
+	   if (test_and_clear_bit(nr, addr) = = 0)
+		   something_went_wrong( ); /* already released: error */
+
+	   example: test_and_set_bit and test_and_clear_bit can be used instead of spin lock, but better to use spinlock.
+	   for readability and spin lock is well debugged and take cares of kernel interrupt and kernel preemption.	
+
+	d) seqlock: <linux/seqlock.h>         //TODO
+		Seqlocks work in situations where the
+		resource to be protected is small, simple, and frequently accessed, and where write
+		access is rare but must be fast.
+	e) Read Copy Update (RCU):<linux/rcupdate.h> Is advanced mutual excluxion scheme. //TODO
+     read corresponding header files for knowing detail of seqlock and RCU.
+	 
+	 Check Quick Reference of chapter 5 in ldd3 for brief of all the calls discussed here.
+9) Just like linux link list, there is a generic fifo (circular buffer implementation) in linux kernel. linux/kfifo.h
+10) Note that naturally aligned integers on x86 systems are assigned atomically. See what is natural alignment.
+    In brief 1 byte data type can be stored anywhere in memory, 2 byte data type can be stored at locations divisible by 2
+	called half word alignment, 4 byte is stored at address divisible by 4 (called word alignment) and double i.e. 8 byte 
+    data type is stored at locations divisible by 8 (called double word alignment) to be called naturally aligned data.
+    Otherwise the data (variable) is not naturally aligned and the processor will access them in more than one machine 
+    cycle and hence assignment like operation can't be atomic in such case. Take atomic_t data type and use provided 
+    apis for guaranteed atomic operations on that atomic variable which is basically an integer type. 
+	For bit wise atomic operation see the bit apis stated above e.g. test_and_set_bit, test_and_clear_bit, etc.
+
+-------------------------important apis for above discussed topics. copy paste might have caused bad text sequencing-------------------------
+THERE HAVE BEEN SO MUCH CHANGE IN FUNCTION NAMES AND LIBRARIES BUT THE CONCEPT REMAINS SAME. USE <linux/mutex.h> for mutex
+#include <asm/semaphore.h>
+void sema_init(struct semaphore *sem, int val);
+The include file that defines semaphores and the operations on them.
+DECLARE_MUTEX(name);
+DECLARE_MUTEX_LOCKED(name);
+Two macros for declaring and initializing a semaphore used in mutual exclusion
+mode.
+void init_MUTEX(struct semaphore *sem);
+void init_MUTEX_LOCKED(struct semaphore *sem);
+These two functions can be used to initialize a semaphore at runtime.
+void down(struct semaphore *sem);
+int down_interruptible(struct semaphore *sem);
+int down_trylock(struct semaphore *sem);
+void up(struct semaphore *sem);
+Lock and unlock a semaphore. down puts the calling process into an uninter-
+ruptible sleep if need be; down_interruptible, instead, can be interrupted by a sig-
+nal. down_trylock does not sleep; instead, it returns immediately if the
+semaphore is unavailable. Code that locks a semaphore must eventually unlock
+it with up.
+
+struct rw_semaphore;
+init_rwsem(struct rw_semaphore *sem);
+The reader/writer version of semaphores and the function that initializes it.
+void down_read(struct rw_semaphore *sem);
+int down_read_trylock(struct rw_semaphore *sem);
+void up_read(struct rw_semaphore *sem);
+Functions for obtaining and releasing read access to a reader/writer semaphore.
+void down_write(struct rw_semaphore *sem)
+int down_write_trylock(struct rw_semaphore *sem)
+void up_write(struct rw_semaphore *sem)
+void downgrade_write(struct rw_semaphore *sem)
+Functions for managing write access to a reader/writer semaphore.
+#include <linux/completion.h>
+DECLARE_COMPLETION(name);
+init_completion(struct completion *c);
+INIT_COMPLETION(struct completion c);
+The include file describing the Linux completion mechanism, and the normal
+methods for initializing completions. INIT_COMPLETION should be used only to
+reinitialize a completion that has been previously used.
+void wait_for_completion(struct completion *c);
+Wait for a completion event to be signalled.
+void complete(struct completion *c);
+void complete_all(struct completion *c);
+Signal a completion event. complete wakes, at most, one waiting thread, while
+complete_all wakes all waiters.
+void complete_and_exit(struct completion *c, long retval);
+Signals a completion event by calling complete and calls exit for the current
+thread.
+#include <linux/spinlock.h>
+spinlock_t lock = SPIN_LOCK_UNLOCKED;
+spin_lock_init(spinlock_t *lock);
+The include file defining the spinlock interface and the two ways of initializing
+locks.
+void spin_lock(spinlock_t *lock);
+void spin_lock_irqsave(spinlock_t *lock, unsigned long flags);
+void spin_lock_irq(spinlock_t *lock);
+void spin_lock_bh(spinlock_t *lock);
+The various ways of locking a spinlock and, possibly, disabling interrupts.
+int spin_trylock(spinlock_t *lock);
+int spin_trylock_bh(spinlock_t *lock);
+Nonspinning versions of the above functions; these return 0 in case of failure to
+obtain the lock, nonzero otherwise.
+void
+void
+void
+void
+spin_unlock(spinlock_t *lock);
+spin_unlock_irqrestore(spinlock_t *lock, unsigned long flags);
+spin_unlock_irq(spinlock_t *lock);
+spin_unlock_bh(spinlock_t *lock);
+The corresponding ways of releasing a spinlock.
+rwlock_t lock = RW_LOCK_UNLOCKED
+rwlock_init(rwlock_t *lock);
+The two ways of initializing reader/writer locks.
+void
+void
+void
+void
+read_lock(rwlock_t *lock);
+read_lock_irqsave(rwlock_t *lock, unsigned long flags);
+read_lock_irq(rwlock_t *lock);
+read_lock_bh(rwlock_t *lock);
+Functions for obtaining read access to a reader/writer lock.
+void
+void
+void
+void
+read_unlock(rwlock_t *lock);
+read_unlock_irqrestore(rwlock_t *lock, unsigned long flags);
+read_unlock_irq(rwlock_t *lock);
+read_unlock_bh(rwlock_t *lock);
+Functions for releasing read access to a reader/writer spinlock.
+void
+void
+void
+void
+write_lock(rwlock_t *lock);
+write_lock_irqsave(rwlock_t *lock, unsigned long flags);
+write_lock_irq(rwlock_t *lock);
+write_lock_bh(rwlock_t *lock);
+Functions for obtaining write access to a reader/writer lock.
+void
+void
+void
+void
+write_unlock(rwlock_t *lock);
+write_unlock_irqrestore(rwlock_t *lock, unsigned long flags);
+write_unlock_irq(rwlock_t *lock);
+write_unlock_bh(rwlock_t *lock);
+Functions for releasing write access to a reader/writer spinlock.
+
+#include <asm/atomic.h>
+atomic_t v = ATOMIC_INIT(value);
+void atomic_set(atomic_t *v, int i);
+int atomic_read(atomic_t *v);
+void atomic_add(int i, atomic_t *v);
+void atomic_sub(int i, atomic_t *v);
+void atomic_inc(atomic_t *v);
+void atomic_dec(atomic_t *v);
+int atomic_inc_and_test(atomic_t *v);
+int atomic_dec_and_test(atomic_t *v);
+int atomic_sub_and_test(int i, atomic_t *v);
+int atomic_add_negative(int i, atomic_t *v);
+int atomic_add_return(int i, atomic_t *v);
+int atomic_sub_return(int i, atomic_t *v);
+int atomic_inc_return(atomic_t *v);
+int atomic_dec_return(atomic_t *v);
+Atomically access integer variables. The atomic_t variables must be accessed
+only through these functions.
+#include <asm/bitops.h>
+void set_bit(nr, void *addr);
+void clear_bit(nr, void *addr);
+void change_bit(nr, void *addr);
+test_bit(nr, void *addr);
+int test_and_set_bit(nr, void *addr);
+int test_and_clear_bit(nr, void *addr);
+int test_and_change_bit(nr, void *addr);
+Atomically access bit values; they can be used for flags or lock variables. Using
+these functions prevents any race condition related to concurrent access to the
+bit.
+#include <linux/seqlock.h>
+seqlock_t lock = SEQLOCK_UNLOCKED;
+seqlock_init(seqlock_t *lock);
+The include file defining seqlocks and the two ways of initializing them.
+unsigned int read_seqbegin(seqlock_t *lock);
+unsigned int read_seqbegin_irqsave(seqlock_t *lock, unsigned long flags);
+int read_seqretry(seqlock_t *lock, unsigned int seq);
+int read_seqretry_irqrestore(seqlock_t *lock, unsigned int seq, unsigned long
+flags);
+Functions for obtaining read access to a seqlock-protected resources.
+void write_seqlock(seqlock_t *lock);
+void write_seqlock_irqsave(seqlock_t *lock, unsigned long flags);
+void write_seqlock_irq(seqlock_t *lock);
+void write_seqlock_bh(seqlock_t *lock);
+int write_tryseqlock(seqlock_t *lock);
+Functions for obtaining write access to a seqlock-protected resource.
+void
+void
+void
+void
+write_sequnlock(seqlock_t *lock);
+write_sequnlock_irqrestore(seqlock_t *lock, unsigned long flags);
+write_sequnlock_irq(seqlock_t *lock);
+write_sequnlock_bh(seqlock_t *lock);
+Functions for releasing write access to a seqlock-protected resource.
+#include <linux/rcupdate.h>
+The include file required to use the read-copy-update (RCU) mechanism.
+void rcu_read_lock;
+void rcu_read_unlock;
+Macros for obtaining atomic read access to a resource protected by RCU.
+void call_rcu(struct rcu_head *head, void (*func)(void *arg), void *arg);
+Arranges for a callback to run after all processors have been scheduled and an
+RCU-protected resource can be safely freed.
+

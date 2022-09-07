@@ -1,0 +1,41 @@
+System request key is helpful is situations where system goes out of control and
+there is risk of filesystem corruption or other issue that may occur in that
+situation. These key let's you send request to kernel even in hang situation.
+
+This is mostly used in debugging and emergenc scenarios.
+
+Alt+SysRq key+ [REISUBPTM] #All three keys at same time
+R = Turns off keyboard raw mode
+E = SAK (secure attention key)
+I = ?
+S = Emergency sync of filesystems
+U = Umount filesystems in readonly mode (to protect from and buggy modules etc writing fs uncontrolably and corrupting it.)
+B = Boot (Make sure to sync fs before boot)
+P = PROCESSOR info print
+T = Current task list print
+M = Memory info print
+
+
+How to use?
+cat /proc/sys/kernel/sysrq
+Make it 1 for sysrq to work.
+sudo su
+echo 1 > /proc/sys/kernel/sysrq
+exit
+This will not persist reboot. You have to change this:
+sudo su
+echo "kernel.sysrq = 1" >> /etc/sysctl.d/99-sysctl.conf
+exit
+Now the change will survive boot
+
+After changing press one of Alt+SysRq key+ [REISUBPTM] #All three keys at same time
+To check logs, see dmesg if it is not printed in console
+
+Note that:
+sudo su
+cat /proc/kmsg also give same message like dmesg. But internally they are different. dmsg works on a circular queue where
+old data is overwritten. But in kmsg this does not happen as size is larger.
+
+To get most out of kernel debugging, you may have to compile kernel by enabling some debugging flags which are normally
+disabled in normal kernel for speed and efficiency purpose. Kernel developers must build kernel with enabling those flags
+to take most advantage.

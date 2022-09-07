@@ -1,0 +1,80 @@
+a) /proc/ file is added just like modules are added.
+b) Mainly there are three ways of adding proc file and their read write
+   functions. Note that the implementations are very dynamic and keep 
+   changing after few kernel versions.
+
+c) So there are mainly three ways viz.
+   i) Using proc file system APIs (Slightly different than method used in scull driver)
+   ii) Using normal filesystem APIs (Just like scull driver used)
+   iii) Using seq_file method (Only reading is possible via this method)
+
+Each node in filesystem has a struct inode structure which contains
+//brief of structures used in filesystem and procfs
+  strut inode {
+    struct owner;
+    struct cdev i_dev; /*Point from where device is attached to kernel*/
+    struct inode_operations; /*Lower level operations on a file on disk*/
+    .../*Other lower level information of a file on disk*/
+  }
+  struct cdev {
+    owner;
+    struct file_operations; /*High level file operations on a file, mainly for users*/
+    ...
+  }
+
+  struct file_operations {
+    read;
+    write;
+    open;
+    release;
+    llseek;
+    ioctl;
+    struct inode;
+    ...
+  }
+
+  struct inode_operations {
+    permissions
+    ...
+  }
+
+  struct proc_dir_entry {
+    read_proc; /*For api of proc fs. This is used to access device data from proc fs*/
+    write_proc;/*For api of proc fs. This is used to access device data from proc fs*/
+    struct file_operations proc_fops; /*File operations. This is used to access device data from file system of seq_file*/
+    struct inode_operations proc_iops; /*This is used to define lower level functions like permissions for a device*/
+    uid;
+    gid;
+  }
+
+  struct file { /*Represents open file. Created on opening of a file and closes on closing of the file*/
+    long int offset;
+    mode;
+    ...
+  }
+
+  struct seq_operations {
+    .start = scull_seq_start,
+    .next = scull_seq_next,
+    .stop = scull_seq_stop,
+    .show = scull_seq_show
+  }
+
+  static int scull_proc_open(struct inode *inode, struct file *file)
+  {
+     return seq_open(file, &scull_seq_ops);
+  }
+
+  static struct file_operations scull_proc_ops = {
+    .owner = THIS_MODULE,
+    .open = scull_proc_open, /*user defined open api for seq*/
+    .read = seq_read, /*canned function*/
+    .llseek = seq_lseek, /*canned function*/
+    .release = seq_release /*canned function*/
+  };
+
+  By using any of aforesaid method, the purpose is to fetch or set data from/to device driver or kernel via file entr in proc fs.
+  The methods are implemented in the source code given in the proc, proc_new directories.
+
+  copy_to_user() (alternative: put_user())
+  copy_from_user() )alternative: get_user())

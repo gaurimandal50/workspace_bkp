@@ -1,0 +1,42 @@
+1) How do open and close work in LKM?
+2) Understand struct inode, sruct file, struct dentry, struct file_operations.
+3) What they do viz:- module_init(), register_chrdev_region(), cdev_init(), cdev_add()?
+4) Module signature.
+5) Double, triple pointer fluency.
+
+{ /*C POINTER FORMULATION FOR EASE OF INTERPRETATION*/
+  int a = 5;
+  int *p = &a;
+    /-> Parent address [PA] = pointer address           [PA]  = self address = &p 
+   p--> pointer value  [PV] =   child address/pointer reference           [CA]  = p = &a 
+    \-> child value    [PD] = value insid child address [VCA] = *p = a = 5
+
+
+   Suppose, int a = 5; int *p = &a; &p = 0x001 ; &a = 0x005;
+   pointer format         = [ PA { PV (PD) ]   = p [0x001 { 0x005 ( 5 ) } ]:int
+   normal variable format = [ VA { VV } ]      = a [0x005 { 5 } ]:int
+   Formula AVD (address, value, dereference) for pointers and AV (address, value) for normal value.
+   Or, ARD (address, reference, dereference), AV (address, value)
+
+   int **q = &p;
+   q [ARD] = [ &q { &p or q ( &a ) } ] = [ARD] = [&=*]
+   p [ARD] = [ &p { &a ( 5 ) } ]
+   a [ARD] = [ &a { NONE (5) } ]
+   a [AV]  = [ &a { 5 } ]
+   Syntax wise, reference in pointer is what value of normal variable is.
+   Memory wise, dereference of n+1th pointer is reference of nth pointer
+
+****s   ARD
+         ||  
+ ***r    ARD
+          ||
+  **q     ARD
+           ||
+   *p      ARD
+            ||
+    a       AV
+Hence a = *(*(*s))) = ***s. Keep this picture in mind while dealing with any pointer.
+Reference can be seen as value of pointer and dereference as value of value of pointer (value of reference of pointer).
+}
+
+Learn to read kernel header files.

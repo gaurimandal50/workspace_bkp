@@ -1,0 +1,40 @@
+22:40:45 execve("./a.out", ["./a.out"], 0x7fffdcc8cfd0 /* 26 vars */) = 0 <0.000451>
+22:40:45 brk(NULL)                      = 0x564baac80000 <0.000051>
+22:40:45 access("/etc/ld.so.nohwcap", F_OK) = -1 ENOENT (No such file or directory) <0.000038>
+22:40:45 access("/etc/ld.so.preload", R_OK) = -1 ENOENT (No such file or directory) <0.000030>
+22:40:45 openat(AT_FDCWD, "/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3 <0.000063>
+22:40:45 fstat(3, {st_mode=S_IFREG|0644, st_size=86614, ...}) = 0 <0.000027>
+22:40:45 mmap(NULL, 86614, PROT_READ, MAP_PRIVATE, 3, 0) = 0x7f313c19c000 <0.000030>
+22:40:45 close(3)                       = 0 <0.000029>
+22:40:45 access("/etc/ld.so.nohwcap", F_OK) = -1 ENOENT (No such file or directory) <0.000028>
+22:40:45 openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libc.so.6", O_RDONLY|O_CLOEXEC) = 3 <0.000032>
+22:40:45 read(3, "\177ELF\2\1\1\3\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\20\35\2\0\0\0\0\0"..., 832) = 832 <0.000027>
+22:40:45 fstat(3, {st_mode=S_IFREG|0755, st_size=2030928, ...}) = 0 <0.000025>
+22:40:45 mmap(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7f313c19a000 <0.000028>
+22:40:45 mmap(NULL, 4131552, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x7f313bb98000 <0.000031>
+22:40:45 mprotect(0x7f313bd7f000, 2097152, PROT_NONE) = 0 <0.000041>
+22:40:45 mmap(0x7f313bf7f000, 24576, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1e7000) = 0x7f313bf7f000 <0.000038>
+22:40:45 mmap(0x7f313bf85000, 15072, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0x7f313bf85000 <0.000030>
+22:40:45 close(3)                       = 0 <0.000028>
+22:40:45 arch_prctl(ARCH_SET_FS, 0x7f313c19b4c0) = 0 <0.000024>
+22:40:45 mprotect(0x7f313bf7f000, 16384, PROT_READ) = 0 <0.000035>
+22:40:45 mprotect(0x564ba8eb1000, 4096, PROT_READ) = 0 <0.000029>
+22:40:45 mprotect(0x7f313c1b2000, 4096, PROT_READ) = 0 <0.000031>
+22:40:45 munmap(0x7f313c19c000, 86614)  = 0 <0.000058>
+22:40:45 fstat(1, {st_mode=S_IFCHR|0620, st_rdev=makedev(136, 0), ...}) = 0 <0.000026>
+22:40:45 brk(NULL)                      = 0x564baac80000 <0.000027>
+22:40:45 brk(0x564baaca1000)            = 0x564baaca1000 <0.000027>
+22:40:45 write(1, "Hoping you made sure that major "..., 61) = 61 <0.000061>
+22:40:45 openat(AT_FDCWD, "/dev/scull0", O_RDWR) = 3 <0.000071>
+22:40:45 nanosleep({tv_sec=20, tv_nsec=0}, {tv_sec=10, tv_nsec=87625320}) = ? ERESTART_RESTARTBLOCK (Interrupted by signal) <9.912485>
+22:40:54 --- SIGWINCH {si_signo=SIGWINCH, si_code=SI_KERNEL} ---
+22:40:54 restart_syscall(<... resuming interrupted nanosleep ...>) = 0 <10.087353>
+22:41:05 ioctl(3, _IOC(_IOC_WRITE, 0xed, 0, 0x8), 0x7fff41a3d1f0) = 0 <0.000063>
+22:41:05 write(1, "Setting of ioctl successful.\n", 29) = 29 <0.000059>
+22:41:05 nanosleep({tv_sec=20, tv_nsec=0}, 0x7fff41a3d1b0) = 0 <20.000280>
+22:41:25 ioctl(3, _IOC(_IOC_READ, 0xed, 0x1, 0x8), 0x7fff41a3d1f4) = 0 <0.000165>
+22:41:25 write(1, "Scull ioctl returned 300.\n", 26) = 26 <0.000147>
+22:41:25 close(3)                       = 0 <0.000162>
+22:41:25 write(1, "close returned 0 Success.\n", 26) = 26 <0.000043>
+22:41:25 exit_group(0)                  = ?
+22:41:25 +++ exited with 0 +++
